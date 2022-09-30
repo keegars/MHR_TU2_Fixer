@@ -14,6 +14,8 @@ namespace MHR_TU2_Fixer.Helpers
         {
             foreach (var file in files)
             {
+                Console.WriteLine($"Attempting to convert {file}");
+
                 var newFileName = file + ".old";
                 File.Move(file, newFileName);
                 var createFile = File.Create(file);
@@ -56,11 +58,13 @@ namespace MHR_TU2_Fixer.Helpers
             var fileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/f_arm272.mdf2.23");
             var npcFaceFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc001_00_face.mdf2.23");
             var npcBodyFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc002_00_body.mdf2.23");
+            var npcBodyFurFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc615_00_body.mdf2.23");
 
             var bodyDetector = "BaseDielectricMap";
             var skinDetector = "SkinMap";
             var npcEyeDetector = "Mask";
             var npcHandDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap" };
+            var npcFurDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap", "FurVelocityMap", "FxMap", "FurTex" };
 
             //Always merge
             for (var i = 0; i < mdfFile.Materials.Count; i++)
@@ -68,16 +72,19 @@ namespace MHR_TU2_Fixer.Helpers
                 var binary = OpenFile(fileName);
                 var npcFaceBinary = OpenFile(npcFaceFileName);
                 var npcBodyBinary = OpenFile(npcBodyFileName);
+                var npcBodyFurBinary = OpenFile(npcBodyFurFileName);
 
                 var exampleMDF = new MDFFile(fileName, binary);
                 var exampleNPCFaceMDF = new MDFFile(npcFaceFileName, npcFaceBinary);
                 var exampleNPCBodyMDF = new MDFFile(npcBodyFileName, npcBodyBinary);
+                var exampleNPCFurMDF = new MDFFile(npcBodyFurFileName, npcBodyFurBinary);
 
                 var bodyMaterial = exampleMDF.Materials[2];
-                var alphaBodyMaterial = exampleMDF.Materials[0];
+                var alphaBodyMaterial = exampleMDF.Materials.First();
                 var skinMaterial = exampleMDF.Materials[4];
-                var eyeMaterial = exampleNPCFaceMDF.Materials[0];
-                var handMaterial = exampleNPCBodyMDF.Materials[1];
+                var npcEyeMaterial = exampleNPCFaceMDF.Materials.First();
+                var npcHandMaterial = exampleNPCBodyMDF.Materials[1];
+                var npcFurMaterial = exampleNPCFurMDF.Materials.Last();
 
                 var material = mdfFile.Materials[i];
                 var isAlphaCheck = material.flags.Any(z => z.Name == "BaseAlphaTestEnable");
@@ -86,6 +93,7 @@ namespace MHR_TU2_Fixer.Helpers
                 {
                     npcFaceBinary.Close();
                     npcBodyBinary.Close();
+                    npcBodyFurBinary.Close();
                     binary.Close();
                     continue;
                 }
@@ -93,12 +101,16 @@ namespace MHR_TU2_Fixer.Helpers
                 Material newMaterial = null;
 
                 //Assign the correct material
-                if (material.Textures.All(z=> npcHandDetector.Contains(z.name)) && mdfFile.FileName.Contains(@"\npc\"))
+                if (material.Textures.All(z => npcFurDetector.Contains(z.name)) && mdfFile.FileName.Contains(@"\npc\"))
                 {
-                    newMaterial = handMaterial;
+                    newMaterial = npcFurMaterial;
+                }
+                else if (material.Textures.All(z=> npcHandDetector.Contains(z.name)) && mdfFile.FileName.Contains(@"\npc\"))
+                {
+                    newMaterial = npcHandMaterial;
                 }
                 else if (material.Textures.Any(z => z.name == npcEyeDetector) && mdfFile.FileName.Contains(@"\npc\")) {
-                    newMaterial = eyeMaterial;
+                    newMaterial = npcEyeMaterial;
                 }
                 else if (material.Textures.Any(z => z.name == skinDetector))
                 {
@@ -182,6 +194,7 @@ namespace MHR_TU2_Fixer.Helpers
 
                 npcFaceBinary.Close();
                 npcBodyBinary.Close();
+                npcBodyFurBinary.Close();
                 binary.Close();
             }
 
