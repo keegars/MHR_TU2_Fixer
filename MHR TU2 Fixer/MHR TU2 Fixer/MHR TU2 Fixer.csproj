@@ -78,6 +78,12 @@
     <None Include="MDF\example\TU2\f_arm272.mdf2.23">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="MDF\example\TU2\npc001_00_face.mdf2.23">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="MDF\example\TU2\npc002_00_body.mdf2.23">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Prefab\example\TU2\f_helm001.pfb.17">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

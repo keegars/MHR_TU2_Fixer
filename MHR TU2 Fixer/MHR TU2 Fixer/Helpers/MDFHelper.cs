@@ -54,26 +54,38 @@ namespace MHR_TU2_Fixer.Helpers
             //Ignore property - OCC Color as it has caused issues with the models showing as white....
 
             var fileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/f_arm272.mdf2.23");
+            var npcFaceFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc001_00_face.mdf2.23");
+            var npcBodyFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc002_00_body.mdf2.23");
 
             var bodyDetector = "BaseDielectricMap";
             var skinDetector = "SkinMap";
+            var npcEyeDetector = "Mask";
+            var npcHandDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap" };
 
             //Always merge
             for (var i = 0; i < mdfFile.Materials.Count; i++)
             {
                 var binary = OpenFile(fileName);
+                var npcFaceBinary = OpenFile(npcFaceFileName);
+                var npcBodyBinary = OpenFile(npcBodyFileName);
 
                 var exampleMDF = new MDFFile(fileName, binary);
+                var exampleNPCFaceMDF = new MDFFile(npcFaceFileName, npcFaceBinary);
+                var exampleNPCBodyMDF = new MDFFile(npcBodyFileName, npcBodyBinary);
 
                 var bodyMaterial = exampleMDF.Materials[2];
                 var alphaBodyMaterial = exampleMDF.Materials[0];
                 var skinMaterial = exampleMDF.Materials[4];
+                var eyeMaterial = exampleNPCFaceMDF.Materials[0];
+                var handMaterial = exampleNPCBodyMDF.Materials[1];
 
                 var material = mdfFile.Materials[i];
                 var isAlphaCheck = material.flags.Any(z => z.Name == "BaseAlphaTestEnable");
 
                 if (material.ShaderType == ShadingType.Decal || material.ShaderType == ShadingType.DecalNRMR || material.ShaderType == ShadingType.DecalWithMetallic)
                 {
+                    npcFaceBinary.Close();
+                    npcBodyBinary.Close();
                     binary.Close();
                     continue;
                 }
@@ -81,7 +93,14 @@ namespace MHR_TU2_Fixer.Helpers
                 Material newMaterial = null;
 
                 //Assign the correct material
-                if (material.Textures.Any(z => z.name == skinDetector))
+                if (material.Textures.All(z=> npcHandDetector.Contains(z.name)) && mdfFile.FileName.Contains(@"\npc\"))
+                {
+                    newMaterial = handMaterial;
+                }
+                else if (material.Textures.Any(z => z.name == npcEyeDetector) && mdfFile.FileName.Contains(@"\npc\")) {
+                    newMaterial = eyeMaterial;
+                }
+                else if (material.Textures.Any(z => z.name == skinDetector))
                 {
                     newMaterial = skinMaterial;
                 }
@@ -161,6 +180,8 @@ namespace MHR_TU2_Fixer.Helpers
                     }
                 }
 
+                npcFaceBinary.Close();
+                npcBodyBinary.Close();
                 binary.Close();
             }
 
