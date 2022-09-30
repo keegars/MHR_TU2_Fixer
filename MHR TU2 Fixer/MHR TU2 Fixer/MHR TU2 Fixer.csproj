@@ -78,6 +78,12 @@
     <None Include="MDF\example\TU2\f_arm272.mdf2.23">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="MDF\example\TU2\f_body353.mdf2.23">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="MDF\example\TU2\f_body355.mdf2.23">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="MDF\example\TU2\npc001_00_face.mdf2.23">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

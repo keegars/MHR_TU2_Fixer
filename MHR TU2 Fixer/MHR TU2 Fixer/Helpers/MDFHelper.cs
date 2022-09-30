@@ -59,12 +59,16 @@ namespace MHR_TU2_Fixer.Helpers
             var npcFaceFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc001_00_face.mdf2.23");
             var npcBodyFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc002_00_body.mdf2.23");
             var npcBodyFurFileName = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/npc615_00_body.mdf2.23");
+            var iceFilename = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/f_body353.mdf2.23");
+            var detailedEmissiveFilename = Path.Combine(Environment.CurrentDirectory, "MDF/example/TU2/f_body355.mdf2.23");
 
             var bodyDetector = "BaseDielectricMap";
             var skinDetector = "SkinMap";
             var npcEyeDetector = "Mask";
             var npcHandDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap" };
             var npcFurDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap", "FurVelocityMap", "FxMap", "FurTex" };
+            var iceDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap", "UserColorchangeMap", "FxMap", "ice_PanoramaMap", "reflectionMap" };
+            var detailedEmissiveDetector = new List<string> { "BaseDielectricMap", "NRMR_NRRTMap", "AlphaMap", "UserColorchangeMap", "FurVelocityMap", "FxMap", "DetailEmissiveMap", "FurTex" };
 
             //Always merge
             for (var i = 0; i < mdfFile.Materials.Count; i++)
@@ -73,11 +77,15 @@ namespace MHR_TU2_Fixer.Helpers
                 var npcFaceBinary = OpenFile(npcFaceFileName);
                 var npcBodyBinary = OpenFile(npcBodyFileName);
                 var npcBodyFurBinary = OpenFile(npcBodyFurFileName);
+                var iceBinary = OpenFile(iceFilename);
+                var detailedEmissiveBinary = OpenFile(detailedEmissiveFilename);
 
                 var exampleMDF = new MDFFile(fileName, binary);
                 var exampleNPCFaceMDF = new MDFFile(npcFaceFileName, npcFaceBinary);
                 var exampleNPCBodyMDF = new MDFFile(npcBodyFileName, npcBodyBinary);
                 var exampleNPCFurMDF = new MDFFile(npcBodyFurFileName, npcBodyFurBinary);
+                var exampleIceMDF = new MDFFile(iceFilename, iceBinary);
+                var exampleDetailedEmissiveMDF = new MDFFile(detailedEmissiveFilename, detailedEmissiveBinary);
 
                 var bodyMaterial = exampleMDF.Materials[2];
                 var alphaBodyMaterial = exampleMDF.Materials.First();
@@ -85,6 +93,8 @@ namespace MHR_TU2_Fixer.Helpers
                 var npcEyeMaterial = exampleNPCFaceMDF.Materials.First();
                 var npcHandMaterial = exampleNPCBodyMDF.Materials[1];
                 var npcFurMaterial = exampleNPCFurMDF.Materials.Last();
+                var iceMaterial = exampleIceMDF.Materials.First();
+                var detailedEmissiveMaterial = exampleDetailedEmissiveMDF.Materials.First();
 
                 var material = mdfFile.Materials[i];
                 var isAlphaCheck = material.flags.Any(z => z.Name == "BaseAlphaTestEnable");
@@ -94,6 +104,8 @@ namespace MHR_TU2_Fixer.Helpers
                     npcFaceBinary.Close();
                     npcBodyBinary.Close();
                     npcBodyFurBinary.Close();
+                    iceBinary.Close();
+                    detailedEmissiveBinary.Close();
                     binary.Close();
                     continue;
                 }
@@ -111,6 +123,14 @@ namespace MHR_TU2_Fixer.Helpers
                 }
                 else if (material.Textures.Any(z => z.name == npcEyeDetector) && mdfFile.FileName.Contains(@"\npc\")) {
                     newMaterial = npcEyeMaterial;
+                }
+                else if (material.Textures.All(z => detailedEmissiveDetector.Contains(z.name)))
+                {
+                    newMaterial = detailedEmissiveMaterial;
+                }
+                else if (material.Textures.All(z => iceDetector.Contains(z.name)))
+                {
+                    newMaterial = iceMaterial;
                 }
                 else if (material.Textures.Any(z => z.name == skinDetector))
                 {
@@ -195,6 +215,8 @@ namespace MHR_TU2_Fixer.Helpers
                 npcFaceBinary.Close();
                 npcBodyBinary.Close();
                 npcBodyFurBinary.Close();
+                iceBinary.Close();
+                detailedEmissiveBinary.Close();
                 binary.Close();
             }
 
