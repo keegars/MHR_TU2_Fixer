@@ -72,6 +72,12 @@ namespace MHR_TU2_Fixer.Helpers
                 var material = mdfFile.Materials[i];
                 var isAlphaCheck = material.flags.Any(z => z.Name == "BaseAlphaTestEnable");
 
+                if (material.ShaderType == ShadingType.Decal || material.ShaderType == ShadingType.DecalNRMR || material.ShaderType == ShadingType.DecalWithMetallic)
+                {
+                    binary.Close();
+                    continue;
+                }
+
                 Material newMaterial = null;
 
                 //Assign the correct material
