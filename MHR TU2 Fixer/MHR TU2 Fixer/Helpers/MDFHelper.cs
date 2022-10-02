@@ -99,7 +99,7 @@ namespace MHR_TU2_Fixer.Helpers
                 var material = mdfFile.Materials[i];
                 var isAlphaCheck = material.flags.Any(z => z.Name == "BaseAlphaTestEnable");
 
-                if (material.ShaderType == ShadingType.Decal || material.ShaderType == ShadingType.DecalNRMR || material.ShaderType == ShadingType.DecalWithMetallic || mdfFile.FileName.Contains(@"\stage\"))
+                if (material.ShaderType == ShadingType.Decal || material.ShaderType == ShadingType.DecalNRMR || material.ShaderType == ShadingType.DecalWithMetallic || material.MasterMaterial.Contains(@"/Env/"))
                 {
                     npcFaceBinary.Close();
                     npcBodyBinary.Close();
